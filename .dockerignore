@@ -1,0 +1,16 @@
+# Keep the docker build context small: the image bakes the toolchain + NDK, not
+# the repo (which is bind-mounted at run time). Exclude build trees, downloaded
+# models/states, and the device OpenCL blob.
+.git
+android-ndk-*
+opencl_sdk/
+mzcache_build/
+build_quantize/
+cuda_build/
+*_install*/
+states/
+results/
+*.gguf
+*.kv
+*.zip
+*.mov

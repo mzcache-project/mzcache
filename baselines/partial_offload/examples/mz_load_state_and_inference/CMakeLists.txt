@@ -1,0 +1,5 @@
+set(TARGET mz_load_state_and_inference)
+add_executable(${TARGET} mz_load_state_and_inference.cpp)
+install(TARGETS ${TARGET} RUNTIME)
+target_link_libraries(${TARGET} PRIVATE common llama ${CMAKE_THREAD_LIBS_INIT})
+target_compile_features(${TARGET} PRIVATE cxx_std_17)

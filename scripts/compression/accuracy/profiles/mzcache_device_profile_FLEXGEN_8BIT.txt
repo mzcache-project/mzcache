@@ -1,0 +1,13 @@
+# mzcache REFERENCE device profile — Galaxy S25+ (SM-S936N, Adreno 830).
+# This is the exact profile the paper's Figure-14 accuracy (F1) numbers were
+# produced with. The profile decides the lossy-compress vs lossless-store chunk
+# split at swap-out (decomp_load_ratio = decomp/(decomp+kv_read)), so F1 itself
+# depends on it. scripts/compression/accuracy/roundtrip_phone.sh pins this file on the device
+# for the duration of the accuracy roundtrip and restores the experimenter's own
+# profile afterwards. Do not edit — see docs/reproduce_f1_accuracy.md.
+version=1
+compression=FLEXGEN_8BIT
+soc=SM8750
+decomp_gbps=5.92561
+kv_read_gbps=3.25037
+weight_read_gbps=3.82981

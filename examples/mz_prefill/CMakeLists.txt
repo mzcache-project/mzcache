@@ -1,0 +1,5 @@
+set(TARGET mz_prefill)
+add_executable(${TARGET} mz_prefill.cpp)
+install(TARGETS ${TARGET} RUNTIME)
+target_link_libraries(${TARGET} PRIVATE common llama mzcache ${CMAKE_THREAD_LIBS_INIT})
+target_compile_features(${TARGET} PRIVATE cxx_std_17)
