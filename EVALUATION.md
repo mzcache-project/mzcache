@@ -507,13 +507,7 @@ variants under the same app-switching workload with a live memory trace: mzCache
 steps its GPU working set down on each backgrounding and swaps back in on return
 (fast first token), while the OS-paging app is LMK-killed and reloads cold.
 
-<video src="real_world_demo_30x.mp4" controls width="720">
-  Your browser can't show the embedded video —
-  <a href="real_world_demo_30x.mp4">download <code>real_world_demo_30x.mp4</code></a> instead.
-</video>
-
-*(2880×2160 HEVC, 28 s. If the player above stays blank, open the file directly —
-most Linux browsers do not decode HEVC, but VLC/mpv and Safari do.)*
+https://github.com/user-attachments/assets/bc424bb9-40f1-49e0-9114-caaf06168e38
 
 This section documents how to **build the app** (Section 7.1) and **reproduce the
 app-switch workload** yourself (Section 7.2).
