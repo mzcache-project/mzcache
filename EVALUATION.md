@@ -507,7 +507,7 @@ variants under the same app-switching workload with a live memory trace: mzCache
 steps its GPU working set down on each backgrounding and swaps back in on return
 (fast first token), while the OS-paging app is LMK-killed and reloads cold.
 
-https://github.com/user-attachments/assets/bc424bb9-40f1-49e0-9114-caaf06168e38
+https://github.com/user-attachments/assets/3925f5db-1e82-4838-b98f-e9cf8accd564
 
 This section documents how to **build the app** (Section 7.1) and **reproduce the
 app-switch workload** yourself (Section 7.2).
