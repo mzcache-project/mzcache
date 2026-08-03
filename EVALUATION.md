@@ -502,14 +502,14 @@ itself — and restores your own profile afterwards.
 mzCache's real-world benefit — surviving heavy multitasking pressure by evicting
 KV (and weights) on `onTrimMemory` and restoring on return, where the OS-paging
 baseline is LMK-killed and cold-starts — is captured in the demo video below
-(`real_world_demo_30x.mov`, 30× speed). It stacks the mzCache and OS-paging
+(`real_world_demo_30x.mp4`, 30× speed). It stacks the mzCache and OS-paging
 variants under the same app-switching workload with a live memory trace: mzCache
 steps its GPU working set down on each backgrounding and swaps back in on return
 (fast first token), while the OS-paging app is LMK-killed and reloads cold.
 
-<video src="real_world_demo_30x.mov" controls width="720">
+<video src="real_world_demo_30x.mp4" controls width="720">
   Your browser can't show the embedded video —
-  <a href="real_world_demo_30x.mov">download <code>real_world_demo_30x.mov</code></a> instead.
+  <a href="real_world_demo_30x.mp4">download <code>real_world_demo_30x.mp4</code></a> instead.
 </video>
 
 *(2880×2160 HEVC, 28 s. If the player above stays blank, open the file directly —
@@ -565,7 +565,7 @@ adb -s $ADB_SERIAL shell am force-stop com.example.llama   # restart to pick it 
 Reproducing the paper's real-world experiment as published takes ~10 app-switch
 rounds and roughly an hour of continuous, by-hand interaction. We reduced it to
 **3 rounds** and recorded ourselves running those 3 rounds; that recording, sped
-up 30×, is the **`real_world_demo_30x.mov`** embedded above.
+up 30×, is the **`real_world_demo_30x.mp4`** embedded above.
 
 Run the 3-round workload yourself — once per variant, ~14 min each:
 
