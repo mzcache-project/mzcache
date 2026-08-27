@@ -239,6 +239,19 @@ The two derived constants can be overridden at **experiment** run time (they are
 read by the experiment binaries, not by this script):
 `MZCACHE_PER_LAYER_BALANCE=<int> MZCACHE_DECOMP_LOAD_RATIO=<0..1>`.
 
+**Quick functional check.** Before the full sweeps, one short run exercises the
+whole setup — the profile gate, the models and states, the per-layer weight
+files and the OpenCL build (~30 s):
+
+```bash
+./scripts/ttft/run_mzcache.sh -c 16385 -f "0 0.5" -r 1 -o results/smoke
+```
+
+The two-row CSV must show TTFT at remaining 50% well below remaining 0% (on the
+paper's Galaxy S25+: 421 ms vs 823 ms). `MZCACHE_VERIFY_RESTORE=1` (Section 8)
+additionally compares the restored chunks against a never-evicted reference and
+prints `bit_mismatches=0`, in ~10 s.
+
 ---
 
 ## 3. TTFT (paper Fig. 9)
@@ -252,7 +265,7 @@ subsection below.
 ### 3.1 mzCache
 
 ```bash
-./scripts/ttft/run_mzcache.sh                       # full sweep: 3 ctx × 5 levels × 3 cycles
+./scripts/ttft/run_mzcache.sh                       # full sweep: 3 ctx × 5 levels × 3 cycles (~5 min)
 # subset example: -c "16385" -f "0 0.5" -r 3        # -o <dir> to keep it in its own CSV
 ```
 
@@ -271,7 +284,7 @@ Build the vendored baseline (GPU), then run the sweep:
 
 ```bash
 ./exp1_partial_offload_build.sh exp1_partial_offload new
-./scripts/ttft/run_partial_offload.sh
+./scripts/ttft/run_partial_offload.sh               # full sweep, ~15 min
 ```
 
 It maps (ctx, ratio) to a (weight_layers, kv_layers) combination internally and
@@ -291,6 +304,7 @@ Resident points (remaining = 100%) are fully automatic:
 
 ```bash
 ./scripts/ttft/run_os_paging.sh                     # -m resident (default)
+# resident + the three evict-full contexts below: ~25 min in total
 ```
 
 Output (both modes, appended): `results/ttft/ttft_os_paging_<device>_<model>.csv`.
@@ -305,7 +319,7 @@ the reboot/OOM risk.
 
 ```bash
 ./scripts/ttft/memstress/setup_memstress.sh   # once: needs $ANDROID_NDK; writes ~7.5 GB of stress files
-./scripts/ttft/run_os_paging.sh -m evict-full -c 16385        # one context per invocation (-r 3 default)
+./scripts/ttft/run_os_paging.sh -m evict-full -c 16385        # one ctx per invocation (-r 3 default) — repeat for 8193 and 32700
 ```
 
 If the phone reboots mid-run, lower the anonymous-pressure cap — `-A 5120` is
@@ -350,7 +364,7 @@ Offload baseline from Section 3.2** — the runner measures it alongside mzCache
 aborts if it is not on the device.
 
 ```bash
-./scripts/overlap_breakdown/run_overlap.sh   # 1 discarded warm-up + 3 reps per config
+./scripts/overlap_breakdown/run_overlap.sh   # 1 discarded warm-up + 3 reps per config (~13 min)
                                              # -c <ctx> -R <remaining> -r <reps> -o <dir>
 python3 scripts/plot/plot_breakdown.py       # -> results/overlap_breakdown/breakdown.png
 python3 scripts/plot/plot_overlap.py         # -> results/overlap_breakdown/overlap.png
@@ -394,7 +408,7 @@ cannot be reached from a host on 192.168.0.x). Rebooting the phone drops tcpip
 mode — re-enable it over USB.
 
 ```bash
-./scripts/power_energy/run_power.sh        # -x <ctx> -R <remaining> -o <dir>
+./scripts/power_energy/run_power.sh        # -x <ctx> -R <remaining> -o <dir>  (~5 min)
 python3 scripts/plot/plot_power_energy.py  # -> results/power_energy/power_energy.png
 ```
 
@@ -435,7 +449,7 @@ Paper setting: Galaxy S25+, 16k context.
 ### 6.2 Space savings and TTFT
 
 ```bash
-./scripts/compression/run_compression.sh all   # space savings (Qwen3+EXAONE) + TTFT (Qwen3)
+./scripts/compression/run_compression.sh all   # space savings (Qwen3+EXAONE) + TTFT (Qwen3), ~5 min
 python3 scripts/plot/plot_compression.py       # -> results/compression/compression.png
 ```
 
