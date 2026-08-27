@@ -131,7 +131,7 @@ build and record that one on the host.
 sudo apt-get update && sudo apt-get install -y build-essential cmake ninja-build \
                      git curl unzip adb file ca-certificates libcurl4-openssl-dev \
                      python3 python3-matplotlib python3-numpy    # last two only for the plots
-./scripts/setup/get_ndk.sh                     # downloads + verifies NDK r29 (~780 MB)
+./scripts/setup/get_ndk.sh                     # downloads + verifies NDK r29 (~750 MB)
 export ANDROID_NDK=$PWD/android-ndk-r29        # the export line the script prints
 ```
 
@@ -514,9 +514,24 @@ app-switch workload** yourself (Section 7.2).
 
 ### 7.1 Build variants (`examples/llama.android`)
 
-Build **on the host, not in the Docker image** — this needs the Android SDK
-(`ANDROID_HOME`, or `sdk.dir` in `examples/llama.android/local.properties`) with
-cmake 3.22.1 installed, plus JDK 17. Build and install both variants:
+Build **on the host, not in the Docker image**. The app has its own toolchain,
+separate from Sections 1-6: **JDK 17** (required by the Android Gradle plugin
+8.2) and an Android SDK (`ANDROID_HOME`, or `sdk.dir` in
+`examples/llama.android/local.properties`) with three packages plus **NDK
+25.1.8937393** — Gradle resolves that exact revision from the SDK, so the r29
+`scripts/setup/get_ndk.sh` installs for Sections 1-6 does not satisfy it:
+
+```bash
+sudo apt-get install -y openjdk-17-jdk
+sdkmanager "platforms;android-34" "build-tools;34.0.0" \
+           "cmake;3.22.1" "ndk;25.1.8937393"
+```
+
+`sdkmanager` comes with the [SDK command-line
+tools](https://developer.android.com/studio#command-line-tools-only); the NDK is
+also a [direct
+download](https://dl.google.com/android/repository/android-ndk-r25b-linux.zip)
+(`25.1.8937393` = r25b). Build and install both variants:
 
 ```bash
 cd examples/llama.android
@@ -533,6 +548,12 @@ adb -s $ADB_SERIAL install -r app/build/outputs/apk/debug/app-debug.apk
 | **OS paging** | `-PmzCpuSwap=true` | `com.example.llama.cpuswap` | CPU-only stock llama.cpp; weights mmapped, KV anonymous (zram); trim signals ignored |
 
 The two variants have different package names, so both can stay installed.
+
+**Launch the app once by hand before Section 7.2.** The app reads its per-layer
+weight files from its own private directory, not from the Section 1.2 copies
+under `/data/local/tmp`, so on first launch it dumps its own set — several
+minutes. Tap **Load** and wait for it to finish; the Section 7.2 driver only
+waits ~18 s and would otherwise start the workload mid-load.
 
 Prerequisites — the last three are already satisfied if you ran Section 1.2;
 `push_files.sh` places and `chmod`s them:
@@ -602,7 +623,7 @@ It reproduces the workload faithfully **only** under these conditions:
   and a matplotlib window and screen-records a 2880 px-wide region, so it needs a
   live `$DISPLAY` on a monitor at least that wide. Not over SSH, not in Docker.
 
-**Host environment.** Beyond the build toolchain (Section 1):
+**Host environment.** Beyond the build toolchains (Sections 1 and 7.1):
 
 ```bash
 sudo apt-get install -y ffmpeg python3-matplotlib python3-pyqt5

@@ -28,7 +28,7 @@ export ANDROID_NDK=<ndk-r25+> ADB_SERIAL=<device-serial>
 ./exp1_partial_offload_build.sh exp1_partial_offload new # baseline: partial offload
 ./cpu_build.sh exp1_android_swap new                     # baseline: OS paging
 ./scripts/setup/get_models.sh                            # FP16 models
-./scripts/setup/get_states.sh                            # prefill states (~17 GB)
+./scripts/setup/get_states.sh                            # prefill states (~18 GB)
 ./scripts/setup/push_files.sh                            # models + states -> device
 ./scripts/setup/gen_weight_layers.sh                     # per-layer weight files
 ./scripts/setup/device_setup.sh                          # governor + zram
