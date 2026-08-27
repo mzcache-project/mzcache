@@ -175,3 +175,9 @@ opencl_sdk/
 # (README: "results/  experiment output (gitignored)").
 results/*
 !results/.gitkeep
+
+# Paper-side working files: the artifact-appendix source is drafted in this
+# checkout but ships with the paper, not with the artifact. PDFs (reference AE
+# appendices, manuscript drafts) are likewise local-only.
+ae.tex
+*.pdf

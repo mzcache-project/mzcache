@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <algorithm>
 #include <cerrno>
+#include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -87,6 +88,10 @@ static int n_past_loaded = 0;
 // The step is overridable at runtime for experiments via
 // `adb shell setprop debug.mzcache.step <float>` (read once in mz_init), so
 // swapout aggressiveness can be varied without rebuilding the APK.
+// A step of exactly 0 is a special case: the app keeps its whole working set
+// resident and ignores every pressure callback. That models an LLM engine with
+// no memory-pressure response at all — the same mzCache build, but unable to
+// give memory back, so the OS is left to reclaim or kill it.
 #define MZ_SWAPOUT_STEP_DEFAULT 0.15f
 static float mz_swapout_step = MZ_SWAPOUT_STEP_DEFAULT;
 static float cur_ratio = 1.0f;
@@ -319,12 +324,18 @@ Java_android_llama_cpp_LLamaAndroid_mz_1init(JNIEnv *env, jobject, jstring jfile
     }
 #endif
 
-    // Experiment knob: swapout step per pressure event.
+    // Experiment knob: swapout step per pressure event. 0 is accepted and means
+    // "never respond to pressure" (see mz_swapout_step above). Parsing is strict
+    // so a typo cannot land on strtof's 0 and silently disable the response —
+    // a non-numeric value is rejected and the default step stays in force.
     {
         char prop[PROP_VALUE_MAX] = {0};
         if (__system_property_get("debug.mzcache.step", prop) > 0) {
-            const float v = (float) atof(prop);
-            if (v > 0.009f && v <= 1.0f) {
+            char * end = nullptr;
+            const float v = strtof(prop, &end);
+            if (end == prop) {
+                LOGe("mz_init: ignoring debug.mzcache.step='%s' (not a number)", prop);
+            } else if (v == 0.0f || (v > 0.009f && v <= 1.0f)) {
                 mz_swapout_step = v;
             } else {
                 LOGe("mz_init: ignoring debug.mzcache.step='%s' (out of range)", prop);
@@ -332,8 +343,9 @@ Java_android_llama_cpp_LLamaAndroid_mz_1init(JNIEnv *env, jobject, jstring jfile
         }
     }
 
-    LOGi("mz_init: working directory set to %s, swapout step = %.2f",
-         mz_files_dir.c_str(), (double) mz_swapout_step);
+    LOGi("mz_init: working directory set to %s, swapout step = %.2f%s",
+         mz_files_dir.c_str(), (double) mz_swapout_step,
+         mz_swapout_step == 0.0f ? " (memory-pressure response DISABLED)" : "");
 }
 
 // Experiment knob: override flash attention at runtime without a rebuild —
@@ -600,6 +612,14 @@ JNIEXPORT void JNICALL
 Java_android_llama_cpp_LLamaAndroid_handleMemoryPressureNative(JNIEnv *env, jobject, jlong context_pointer, jlong model_pointer, jlong mzcache_core_pointer) {
 #ifdef MZCACHE_SVM_KV_CHUNK
     LOGi("Memory pressure signal detected, native function called.");
+
+    // step 0: no pressure response at all. Return before touching the core so
+    // the working set stays exactly where it is — nothing compressed, stored or
+    // unloaded, and cur_ratio left at whatever it was.
+    if (mz_swapout_step == 0.0f) {
+        LOGi("handleMemoryPressureNative: swapout step = 0, pressure response disabled — ignoring");
+        return;
+    }
 
     auto * core = reinterpret_cast<mzcache_core *>(mzcache_core_pointer);
     auto * ctx = reinterpret_cast<llama_context *>(context_pointer);

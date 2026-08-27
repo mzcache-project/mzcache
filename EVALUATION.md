@@ -297,7 +297,7 @@ Output (both modes, appended): `results/ttft/ttft_os_paging_<device>_<model>.csv
 
 The **full-eviction endpoint is fully automatic** (`evict-full`): it applies
 memory pressure in two stages — `mmap_touch` (file-cache) first, then a ramped
-`anon_hog` (dirty-anonymous, capped at `-A` MiB ≈ MemTotal − 2 GiB) — until the
+`anon_hog` (dirty-anonymous, capped at `-A` MiB ≈ MemTotal − 4 GiB) — until the
 process's resident weight + KV Rss falls to `-T` percent of the warm baseline
 (default 10), then measures TTFT there. This mode has **no**
 `MemAvailable`/`SwapFree` guard: it deliberately pushes RSS toward 0 and accepts

@@ -8,6 +8,9 @@ evicts it under memory pressure using mzCache.
   unload weight layers). Each pressure event lowers the resident ratio by
   `step` — 0.15 by default (1.0 → 0.85 → 0.70 → ...), settable at runtime with
   `adb shell setprop debug.mzcache.step <frac>` (read once per app start).
+  Setting it to `0` disables the response entirely: pressure callbacks are
+  logged and ignored, so the working set stays fully resident and the OS is
+  left to reclaim or kill the process.
 - **Send** → `chat_completion_init` → `mzcache_core::swapin_generate(...)` when the
   KV was swapped out (restore overlapped with prefilling the new turn), then the
   ratio resets to 1.0. Repeated cycles are supported (see

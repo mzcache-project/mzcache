@@ -59,10 +59,10 @@ The `.kv` files are named `<arch>_<type>_fa_<mzcache_id>.kv` (e.g.
 
 ## Prerequisites
 
-**Both machines:** clone this branch.
+**Both machines:** clone this repository.
 
 ```bash
-git clone -b mzcache_v0.9_ae <this-repo-url> mzcache && cd mzcache
+git clone <this-repo-url> mzcache && cd mzcache
 ```
 
 **GPU server:** CUDA toolkit + NVIDIA driver, cmake, a C++17 compiler, Python 3

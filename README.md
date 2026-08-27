@@ -1,4 +1,4 @@
-# mzCache — Artifact for "mzCache: Mobile LLM Memory Management for Responsive Inference under Multitasking" (MobiCom 2026)
+# mzCache — Artifact for "mzCache: On-Device LLM Memory Management under Multitasking" (MobiCom 2026)
 
 mzCache is a restoration-oriented memory management system for on-device LLM
 inference under mobile multitasking. Under memory pressure it elastically
